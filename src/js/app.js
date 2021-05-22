@@ -24,17 +24,37 @@ App = {
   },
 
   initWeb3: async function() {
-    /*
-     * Replace me...
-     */
+      if(window.ethereum){
+          App.web3Provider = window.ethereum;
+          try{
+              // Requesiting account access
+              await window.ethereum.enable();
+          } catch(error){
+              console.error("User denied account access");
+          }
+      }
+
+      else if(window.web3){
+          App.web3Provider = window.web3.currentProvider;
+      }
+      else{
+          App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+      }
+
+      web3 = new Web3(App.web3Provider);
 
     return App.initContract();
   },
 
   initContract: function() {
-    /*
-     * Replace me...
-     */
+      $.getJSON('Adoption.json',function(data){
+          var AdoptionArtifact = data;
+          App.contracts.Adoption = TruffleContract(AdoptionArtifact);
+          App.contracts.Adoption.setProvider(App.web3Provider);
+
+          return App.markAdopted();
+
+      })
 
     return App.bindEvents();
   },
